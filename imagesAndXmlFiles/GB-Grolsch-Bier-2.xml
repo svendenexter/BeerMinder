@@ -1,0 +1,26 @@
+<annotation>
+	<folder>images</folder>
+	<filename>GB-Grolsch-Bier-2.jpg</filename>
+	<path>D:\Beercaps\images\GB-Grolsch-Bier-2.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>505</width>
+		<height>505</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>grolsch</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>22</xmin>
+			<ymin>20</ymin>
+			<xmax>483</xmax>
+			<ymax>492</ymax>
+		</bndbox>
+	</object>
+</annotation>

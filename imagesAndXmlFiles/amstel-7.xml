@@ -1,0 +1,26 @@
+<annotation>
+	<folder>images</folder>
+	<filename>amstel-7.jpg</filename>
+	<path>D:\Beercaps\images\amstel-7.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>1500</width>
+		<height>1500</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>amstel</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>421</xmin>
+			<ymin>432</ymin>
+			<xmax>1124</xmax>
+			<ymax>1129</ymax>
+		</bndbox>
+	</object>
+</annotation>

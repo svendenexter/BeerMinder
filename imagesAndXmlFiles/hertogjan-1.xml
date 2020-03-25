@@ -1,0 +1,26 @@
+<annotation>
+	<folder>images</folder>
+	<filename>hertogjan-1.jpg</filename>
+	<path>D:\Beercaps\images\hertogjan-1.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>512</width>
+		<height>512</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>hertog jan</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>10</xmin>
+			<ymin>18</ymin>
+			<xmax>509</xmax>
+			<ymax>494</ymax>
+		</bndbox>
+	</object>
+</annotation>

@@ -1,0 +1,26 @@
+<annotation>
+	<folder>images</folder>
+	<filename>heineken-12.jpg</filename>
+	<path>D:\Beercaps\images\heineken-12.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>1200</width>
+		<height>1200</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>heineken</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>9</xmin>
+			<ymin>9</ymin>
+			<xmax>1195</xmax>
+			<ymax>1191</ymax>
+		</bndbox>
+	</object>
+</annotation>
