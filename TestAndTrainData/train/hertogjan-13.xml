@@ -1,0 +1,26 @@
+<annotation>
+	<folder>training</folder>
+	<filename>hertogjan-13.JPEG</filename>
+	<path>C:\Users\Svend\training\hertogjan-13.JPEG</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>600</width>
+		<height>600</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>hertogjan</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>54</xmin>
+			<ymin>110</ymin>
+			<xmax>153</xmax>
+			<ymax>206</ymax>
+		</bndbox>
+	</object>
+</annotation>

@@ -1,0 +1,26 @@
+<annotation>
+	<folder>training</folder>
+	<filename>corona-8.jpg</filename>
+	<path>C:\Users\Svend\training\corona-8.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>600</width>
+		<height>600</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>corona</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>109</xmin>
+			<ymin>227</ymin>
+			<xmax>358</xmax>
+			<ymax>480</ymax>
+		</bndbox>
+	</object>
+</annotation>

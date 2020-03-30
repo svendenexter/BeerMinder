@@ -1,0 +1,26 @@
+<annotation>
+	<folder>training</folder>
+	<filename>heineken-13.jpg</filename>
+	<path>C:\Users\Svend\training\heineken-13.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>600</width>
+		<height>600</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>heineken</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>266</xmin>
+			<ymin>266</ymin>
+			<xmax>420</xmax>
+			<ymax>337</ymax>
+		</bndbox>
+	</object>
+</annotation>

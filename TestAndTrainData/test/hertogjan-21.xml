@@ -1,0 +1,26 @@
+<annotation>
+	<folder>testing</folder>
+	<filename>hertogjan-21.JPEG</filename>
+	<path>C:\Users\Svend\testing\hertogjan-21.JPEG</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>600</width>
+		<height>600</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>hertogjan</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>269</xmin>
+			<ymin>424</ymin>
+			<xmax>364</xmax>
+			<ymax>515</ymax>
+		</bndbox>
+	</object>
+</annotation>

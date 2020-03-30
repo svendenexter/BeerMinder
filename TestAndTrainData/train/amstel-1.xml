@@ -1,0 +1,26 @@
+<annotation>
+	<folder>training</folder>
+	<filename>amstel-1.jpg</filename>
+	<path>C:\Users\Svend\training\amstel-1.jpg</path>
+	<source>
+		<database>Unknown</database>
+	</source>
+	<size>
+		<width>600</width>
+		<height>600</height>
+		<depth>3</depth>
+	</size>
+	<segmented>0</segmented>
+	<object>
+		<name>amstel</name>
+		<pose>Unspecified</pose>
+		<truncated>0</truncated>
+		<difficult>0</difficult>
+		<bndbox>
+			<xmin>47</xmin>
+			<ymin>27</ymin>
+			<xmax>562</xmax>
+			<ymax>565</ymax>
+		</bndbox>
+	</object>
+</annotation>
