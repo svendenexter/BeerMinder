@@ -1,11 +1,7 @@
-amstel
-brand
-corona
-grolsch
-heineken
-hertogjan
 jupiler
 kornuit
+heineken
+grolsch
+amstel
 leffe
-w
-.
+hertogjan
