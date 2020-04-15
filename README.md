@@ -11,3 +11,5 @@ So for every vent a different brand!
 Lots of love,
 
 Team BeerMinder
+
+note: the weight file is to big to upload to github, so if you need it just contact us
