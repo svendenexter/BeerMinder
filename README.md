@@ -7,11 +7,12 @@ To use BeerMinder you will need to run the code on your computer. The code will 
 NOTE: the weight file is missing on this github page because its too bigg to upload contact us for this file or any questions
 
 This should be in your webbowser:
-![filled API](https://github.com/svendenexter/BeerMinder/blob/master/filledAPI.png)
+
+![empty API](https://github.com/svendenexter/BeerMinder/blob/master/emptyAPI.png)
 
 you can upload your picture by selecting your file in browse and press upload. Your picture will be displayed below. On the right picture you will see all the detected caps. Below the right picture you will see some information about the detected caps and a price estimation. 
 
-![empty API](https://github.com/svendenexter/BeerMinder/blob/master/emptyAPI.png)
+![filled API](https://github.com/svendenexter/BeerMinder/blob/master/filledAPI.png)
 
 We hope you enjoy BeerMinder.
 
