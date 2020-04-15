@@ -1,4 +1,4 @@
-The code for beerminder is based on the code from the AI guy. Follow his videos for a better understanding. https://www.youtube.com/watch?v=zJDUhGL26iU
+The code for beerminder is based on the code from the AI guy. Follow his videos for a better understanding. https://www.youtube.com/channel/UCrydcKaojc44XnuXrfhlV8Q
 
 # Yolov3 Object Detection with Flask and Tensorflow 2.0 (APIs and Detections)
 Yolov3 is an algorithm that uses deep convolutional neural networks to perform object detection. This repository implements Yolov3 using TensorFlow 2.0 and creates two easy-to-use APIs that you can integrate into web or mobile applications. <br>
