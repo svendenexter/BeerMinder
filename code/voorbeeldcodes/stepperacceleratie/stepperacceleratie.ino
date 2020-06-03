@@ -13,16 +13,20 @@ AccelStepper stepper = AccelStepper(motorInterfaceType, stepPin, dirPin);
 
 void setup() {
   // Set the maximum speed and acceleration:
-  stepper.setMaxSpeed(400000);
-  stepper.setAcceleration(500000);
+  stepper.setMaxSpeed(4000);
+  stepper.setAcceleration(500);
+  Serial.begin(9600);
 }
 
 void loop() {
   // Set the target position:
-  stepper.moveTo(200 *32*8);
+  stepper.moveTo(200 *32);
   stepper.runToPosition();
+  stepper.currentPosition();
+  stepper.stop();
+  Serial.println(stepper.currentPosition());
   delay(1000);
-  stepper.moveTo(200 *32*8 + 1);
+  stepper.moveTo(200 *32);
   stepper.runToPosition();
   // Run to target position with set speed and acceleration/deceleration:
   
