@@ -10,8 +10,8 @@
 #include <MultiStepper.h>
 #include <AccelStepper.h>
 
+#pragma region define pins	
 
-// Define stepper motor connections and motor interface type. Motor interface type must be set to 1 when using a driver:
 #define dirPin1 2
 #define stepPin1 3
 #define dirPin2 4
@@ -24,8 +24,6 @@
 #define stepPin5 11
 #define dirPin6 12
 #define stepPin6 13
-
-#define motorInterfaceType 1
 
 //knoppen
 #define knop_axis_1_cw 22
@@ -54,19 +52,41 @@
 #define led_axis_6_cw 32
 #define led_axis_6_ccw 33
 
+#pragma endregion 
 
+#pragma region define pins	
+
+#pragma endregion 
+
+#pragma region accelstepper declaration
+
+#define motorInterfaceType 1
 // Create a new instance of the AccelStepper class:
 AccelStepper stepper1 = AccelStepper(motorInterfaceType, stepPin1, dirPin6);
 AccelStepper stepper2 = AccelStepper(motorInterfaceType, stepPin2, dirPin5);
 AccelStepper stepper3 = AccelStepper(motorInterfaceType, stepPin3, dirPin4);
 AccelStepper stepper4 = AccelStepper(motorInterfaceType, stepPin4, dirPin3);
-AccelStepper stepper5= AccelStepper(motorInterfaceType, stepPin5, dirPin2);
+AccelStepper stepper5 = AccelStepper(motorInterfaceType, stepPin5, dirPin2);
 AccelStepper stepper6 = AccelStepper(motorInterfaceType, stepPin6, dirPin1);
+
+#pragma endregion 
+
+// Define stepper motor connections and motor interface type. Motor interface type must be set to 1 when using a driver:
 
 void setup() {
 	// Set the maximum speed and acceleration:
-	stepper.setMaxSpeed(1000);
-	stepper.setAcceleration(500);
+	stepper1.setMaxSpeed(1000);
+	stepper1.setAcceleration(500);
+	stepper2.setMaxSpeed(1000);
+	stepper2.setAcceleration(500);
+	stepper3.setMaxSpeed(1000);
+	stepper3.setAcceleration(500);
+	stepper4.setMaxSpeed(1000);
+	stepper4.setAcceleration(500);
+	stepper5.setMaxSpeed(1000);
+	stepper5.setAcceleration(500);
+	stepper6.setMaxSpeed(1000);
+	stepper6.setAcceleration(500);
 }
 
 void loop() {
