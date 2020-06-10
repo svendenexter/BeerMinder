@@ -7,6 +7,7 @@
 /* Example sketch to control a stepper motor with TB6600 stepper motor driver, AccelStepper library and Arduino: acceleration and deceleration. More info: https://www.makerguides.com */
 
 // Include the AccelStepper library:
+#include <Servo.h>
 #include <MultiStepper.h>
 #include <AccelStepper.h>
 
@@ -26,6 +27,10 @@
 #define dirPin6 12
 #define stepPin6 13
 
+#define enable_all_steppers 52
+
+// data poorten
+
 //knoppen
 #define knop_axis_1_cw 22
 #define knop_axis_1_ccw 23
@@ -39,14 +44,15 @@
 #define knop_axis_5_ccw 31
 #define knop_axis_6_cw 32
 #define knop_axis_6_ccw 33
-#define knop_eof_on 34
-#define knop_eof_off 35
+#define knop_tool_cw 34
+#define knop_tool_ccw 35
 
 #define knop_joggen 36
-#define knop_reserve1 37
-#define knop_reserve2 38
-#define knop_reserve3 39
+#define knop_noodstop 37
+#define knop_reset 38
+#define knop_dodemans 39
 
+#define knop_enable_all_steppers 51
 
 //switches
 #define switch_axis_1 40
@@ -57,15 +63,21 @@
 #define switch_axis_5_cw 45
 #define switch_axis_5_ccw 46
 #define switch_axis_6 47 
+#define switch_axis_2_ccw 48 //als nodig is
 
-//leds
+#define tool_servo_pin 49	//servo
+#define tool_servo2_pin 50
 
+//#define knop_enable_all_steppers 51
+// 52 is used by enable all steppers
+
+#define reserve 53 // is nog vrij
 
 //12 analog ports
 //a0 - a11
 #pragma endregion 
 
-//accelstepper declaration
+//accelstepper declaration and servo
 #pragma region 
 // Define stepper motor connections and motor interface type. Motor interface type must be set to 1 when using a driver:
 #define motorInterfaceType 1
@@ -78,6 +90,8 @@ AccelStepper stepper5 = AccelStepper(motorInterfaceType, stepPin5, dirPin2);
 AccelStepper stepper6 = AccelStepper(motorInterfaceType, stepPin6, dirPin1);
 
 MultiStepper steppers;
+
+Servo servo_tool;
 
 #pragma endregion 
 
@@ -101,8 +115,11 @@ MultiStepper steppers;
 
 //variabelen
 #pragma region
+//variabelen voor snelle software verandering/instelling
 int softwarejoggen = 1;
 
+// start variabels of parameters
+int servo_tool_pos = 1500; //set servo to midpoint 1500 (servo between 700 and 2300 or 1000 and 2000)
 #pragma endregion
 
 
@@ -121,20 +138,10 @@ void setup() {
 	pinMode(knop_axis_5_ccw, OUTPUT);
 	pinMode(knop_axis_6_cw, OUTPUT);
 	pinMode(knop_axis_6_ccw, OUTPUT);
+	pinMode(knop_axis_6_cw, OUTPUT);
+	pinMode(knop_tool_cw, OUTPUT);
+	pinMode(knop_tool_ccw, OUTPUT);
 	pinMode(knop_joggen, OUTPUT);
-
-	pinMode(led_axis_1_cw, OUTPUT);
-	pinMode(led_axis_1_ccw, OUTPUT);
-	pinMode(led_axis_2_cw, OUTPUT);
-	pinMode(led_axis_2_ccw, OUTPUT);
-	pinMode(led_axis_3_cw, OUTPUT);
-	pinMode(led_axis_3_ccw, OUTPUT);
-	pinMode(led_axis_4_cw, OUTPUT);
-	pinMode(led_axis_4_ccw, OUTPUT);
-	pinMode(led_axis_5_cw, OUTPUT);
-	pinMode(led_axis_5_ccw, OUTPUT);
-	pinMode(led_axis_6_cw, OUTPUT);
-	pinMode(led_axis_6_ccw, OUTPUT);
 
 	stepper1.setMaxSpeed(1000);
 	stepper1.setAcceleration(500);
@@ -153,13 +160,12 @@ void setup() {
 	steppers.addStepper(stepper1);
 	steppers.addStepper(stepper2);
 
-
-	pinMode(LED_BUILTIN, OUTPUT);
+	servo_tool.attach(tool_servo_pin);
 }
 
 
-void joggen() {
-	//set acceleration high for smooth movement
+void joggen() {	
+	/*
 	stepper1.setMaxSpeed(1000);
 	stepper1.setAcceleration(99999);
 	stepper2.setMaxSpeed(1000);
@@ -172,15 +178,19 @@ void joggen() {
 	stepper5.setAcceleration(99999);
 	stepper6.setMaxSpeed(1000);
 	stepper6.setAcceleration(99999);
-
+	*/
+	
 	//axis 1
 	if (knop_axis_1_cw == HIGH) {
 		stepper1.moveTo(stepper1.currentPosition() + 10);
-		stepper1.run();
+		stepper1.setSpeed(1000);
+		stepper1.runSpeed();
+		//stepper1.run();
 	}
-	else if (knop_axis_1_cw == HIGH) {
+	else if (knop_axis_1_ccw == HIGH) {
 		stepper1.moveTo(stepper1.currentPosition() - 10);
-		stepper1.run();
+		stepper1.setSpeed(1000);
+		stepper1.runSpeed();
 	}
 	else {
 		stepper1.stop();
@@ -188,11 +198,13 @@ void joggen() {
 	//axis 2
 	if (knop_axis_2_cw == HIGH) {
 		stepper2.moveTo(stepper2.currentPosition() + 10);
-		stepper2.run();
+		stepper2.setSpeed(1000);
+		stepper2.runSpeed();
 	}
-	else if (knop_axis_2_cw == HIGH) {
+	else if (knop_axis_2_ccw == HIGH) {
 		stepper2.moveTo(stepper2.currentPosition() - 10);
-		stepper2.run();
+		stepper2.setSpeed(1000);
+		stepper2.runSpeed();
 	}
 	else {
 		stepper2.stop();
@@ -200,11 +212,13 @@ void joggen() {
 	//axis 3
 	if (knop_axis_3_cw == HIGH) {
 		stepper3.moveTo(stepper1.currentPosition() + 10);
-		stepper3.run();
+		stepper3.setSpeed(1000);
+		stepper3.runSpeed();
 	}
-	else if (knop_axis_3_cw == HIGH) {
+	else if (knop_axis_3_ccw == HIGH) {
 		stepper3.moveTo(stepper3.currentPosition() - 10);
-		stepper3.run();
+		stepper3.setSpeed(1000);
+		stepper3.runSpeed();
 	}
 	else {
 		stepper3.stop();
@@ -212,11 +226,13 @@ void joggen() {
 	//axis 4
 	if (knop_axis_4_cw == HIGH) {
 		stepper4.moveTo(stepper4.currentPosition() + 10);
-		stepper4.run();
+		stepper4.setSpeed(1000);
+		stepper4.runSpeed();
 	}
-	else if (knop_axis_4_cw == HIGH) {
+	else if (knop_axis_4_ccw == HIGH) {
 		stepper4.moveTo(stepper4.currentPosition() - 10);
-		stepper4.run();
+		stepper4.setSpeed(1000);
+		stepper4.runSpeed();
 	}
 	else {
 		stepper4.stop();
@@ -224,35 +240,40 @@ void joggen() {
 	//axis 5
 	if (knop_axis_5_cw == HIGH) {
 		stepper5.moveTo(stepper5.currentPosition() + 10);
-		stepper5.run();
+		stepper5.setSpeed(1000);
+		stepper5.runSpeed();
 	}
-	else if (knop_axis_5_cw == HIGH) {
+	else if (knop_axis_5_ccw == HIGH) {
 		stepper5.moveTo(stepper5.currentPosition() - 10);
-		stepper5.run();
+		stepper5.setSpeed(1000);
+		stepper5.runSpeed();
 	}
 	else {
 		stepper5.stop();
 	}
 	//axis 6
 	if (knop_axis_6_cw == HIGH) {
-		stepper6.moveTo(stepper6.currentPosition() + 10);
-		stepper6.run();
+		stepper6.moveTo(stepper6.currentPosition() + 1);
+		stepper6.setSpeed(1000);
+		stepper6.runSpeed();
 	}
-	else if (knop_axis_6_cw == HIGH) {
-		stepper6.moveTo(stepper6.currentPosition() - 10);
-		stepper6.run();
+	else if (knop_axis_6_ccw == HIGH) {
+		stepper6.moveTo(stepper6.currentPosition() - 1);
+		stepper6.setSpeed(1000);
+		stepper6.runSpeed();
 	}
 	else {
 		stepper6.stop();
+	}	
+	if (knop_tool_cw == HIGH) {
+		servo_tool.writeMicroseconds(servo_tool_pos + 1);
+	}
+	else if (knop_tool_ccw == HIGH) {
+		servo_tool.writeMicroseconds(servo_tool_pos - 1);
 	}
 }
 
 void loop() {
-
-	digitalWrite(LED_BUILTIN, HIGH);   // turn the LED on (HIGH is the voltage level)
-	delay(1000);                       // wait for a second
-	digitalWrite(LED_BUILTIN, LOW);    // turn the LED off by making the voltage LOW
-	delay(1000);                       // wait for a second
 
 	if (knop_joggen == HIGH || softwarejoggen == 1) {
 		joggen();
