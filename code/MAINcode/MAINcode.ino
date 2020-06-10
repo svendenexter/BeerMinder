@@ -27,6 +27,10 @@
 #define dirPin6 12
 #define stepPin6 13
 
+#define enable_all_steppers 52
+
+// data poorten
+
 //knoppen
 #define knop_axis_1_cw 22
 #define knop_axis_1_ccw 23
@@ -44,9 +48,11 @@
 #define knop_tool_ccw 35
 
 #define knop_joggen 36
-#define knop_reserve1 37
-#define knop_reserve2 38
-#define knop_reserve3 39
+#define knop_noodstop 37
+#define knop_reset 38
+#define knop_dodemans 39
+
+#define knop_enable_all_steppers 51
 
 //switches
 #define switch_axis_1 40
@@ -57,13 +63,15 @@
 #define switch_axis_5_cw 45
 #define switch_axis_5_ccw 46
 #define switch_axis_6 47 
+#define switch_axis_2_ccw 48 //als nodig is
 
-#define tool_servo_pin 48	//servo
-#define tool_servo2_pin 49
+#define tool_servo_pin 49	//servo
+#define tool_servo2_pin 50
 
-#define reserve1 50
-#define reserve1 51
-#define reserve1 52
+//#define knop_enable_all_steppers 51
+// 52 is used by enable all steppers
+
+#define reserve 53 // is nog vrij
 
 //12 analog ports
 //a0 - a11
