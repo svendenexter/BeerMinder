@@ -221,97 +221,108 @@ void joggen() {
 
     //axis 1
     if (digitalRead(knop_axis_1_cw) == HIGH) {
-        stepper1.move(100);
+        stepper1.move(1);
         stepper1.setSpeed(1000);
-        digitalWrite(dirPin1, HIGH); 
+        //digitalWrite(dirPin1, HIGH); 
         //stepper1.setPinsInverted(true,false, false);
         stepper1.runSpeed();
-        Serial.println("knop 1 cw");
-        Serial.println(String(stepper1.currentPosition()));
-        Serial.println(String(stepper1.distanceToGo()));
-        Serial.println(digitalRead(dirPin1));
+        //Serial.println("knop 1 cw");
+        //Serial.println(String(stepper1.currentPosition()));
+        //Serial.println(String(stepper1.distanceToGo()));
+        //Serial.println(digitalRead(dirPin1));
         //stepper1.run();
     }
     else if (digitalRead(knop_axis_1_ccw) == HIGH) {
-        stepper1.move(-100);
+        stepper1.move(-1);
         stepper1.setSpeed(1000);
-        digitalWrite(dirPin1, LOW); 
-        //stepper1.setPinsInverted(true,false, false);   // bij 1 van de twee moet deze en misschien weer uit zetten !!
+        stepper1.setPinsInverted(true,false, false);
         stepper1.runSpeed();
-        Serial.println(" knop 1 ccw ");
-        Serial.println(String(stepper1.currentPosition()));
-        Serial.println(String(stepper1.distanceToGo()));
-        Serial.println(digitalRead(dirPin1));
+        stepper1.setPinsInverted(false,false, false); 
+        //Serial.println(" knop 1 ccw ");
+        ///Serial.println(String(stepper1.currentPosition()));
+        //Serial.println(String(stepper1.distanceToGo()));
+        //Serial.println(digitalRead(dirPin1));
+        
     }
     else {
         stepper1.stop();
     }
     //axis 2
     if (digitalRead(knop_axis_2_cw) == HIGH) {
-        stepper2.moveTo(stepper2.currentPosition() + 1);
+        stepper2.move(1);
         stepper2.setSpeed(1000);
         stepper2.runSpeed();
     }
     else if (digitalRead(knop_axis_2_ccw) == HIGH) {
-        stepper2.moveTo(stepper2.currentPosition() - 1);
+        stepper2.move(-1);
         stepper2.setSpeed(1000);
+        stepper2.setPinsInverted(true,false, false);
         stepper2.runSpeed();
+        stepper2.setPinsInverted(false,false, false);
     }
     else {
         stepper2.stop();
     }
     //axis 3
     if (digitalRead(knop_axis_3_cw) == HIGH) {
-        stepper3.moveTo(stepper3.currentPosition() + 1);
-        stepper3.setSpeed(1000);
+        stepper3.move(1);
+        stepper3.setSpeed(3000);
         stepper3.runSpeed();
     }
     else if (digitalRead(knop_axis_3_ccw) == HIGH) {
-        stepper3.moveTo(stepper3.currentPosition() - 1);
+        stepper3.move(-1);
         stepper3.setSpeed(1000);
+        stepper3.setPinsInverted(true,false, false);
         stepper3.runSpeed();
+        stepper3.setPinsInverted(false,false, false);
     }
     else {
         stepper3.stop();
     }
     //axis 4
     if (digitalRead(knop_axis_4_cw) == HIGH) {
-        stepper4.moveTo(stepper4.currentPosition() + 1);
+        stepper4.move(1);
         stepper4.setSpeed(1000);
         stepper4.runSpeed();
     }
     else if (digitalRead(knop_axis_4_ccw) == HIGH) {
-        stepper4.moveTo(stepper4.currentPosition() - 1);
+        stepper4.move(-1);
         stepper4.setSpeed(1000);
+        stepper4.setPinsInverted(true,false, false);
         stepper4.runSpeed();
+        stepper4.setPinsInverted(false,false, false);
     }
     else {
         stepper4.stop();
     }
     //axis 5
     if (digitalRead(knop_axis_5_cw) == HIGH) {
-        stepper5.moveTo(stepper5.currentPosition() + 1);
+        stepper5.move(1);
         stepper5.setSpeed(1000);
         stepper5.runSpeed();
     }
     else if (digitalRead(knop_axis_5_ccw) == HIGH) {
-        stepper5.moveTo(stepper5.currentPosition() - 1);
+        stepper5.move(-1);
         stepper5.setSpeed(1000);
+        stepper5.setPinsInverted(true,false, false);
         stepper5.runSpeed();
+        stepper5.setPinsInverted(false,false, false);
     }
     else {
         stepper5.stop();
     }
     //axis 6
     if (digitalRead(knop_axis_6_cw) == HIGH) {
-        stepper6.moveTo(stepper6.currentPosition() + 1);
+        stepper6.move(1);
         stepper6.setSpeed(1000);
         stepper6.runSpeed();
     }
     else if (digitalRead(knop_axis_6_ccw) == HIGH) {
-        stepper6.moveTo(stepper6.currentPosition() - 1);
+        stepper6.move(-1);
         stepper6.setSpeed(1000);
+        stepper6.setPinsInverted(true,false, false);
         stepper6.runSpeed();
+        stepper6.setPinsInverted(false,false, false);
     }
     else {
         stepper6.stop();
