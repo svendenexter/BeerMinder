@@ -30,8 +30,8 @@
 #define enable_all_steppers 52
 
 // data poorten
-
-//knoppen
+/*
+//knoppen //verkeerd gespiegeld
 #define knop_axis_1_cw 22
 #define knop_axis_1_ccw 23
 #define knop_axis_2_cw 24
@@ -46,9 +46,26 @@
 #define knop_axis_6_ccw 33
 #define knop_tool_cw 34
 #define knop_tool_ccw 35
+*/
+//knoppen
+#define knop_axis_1_cw 35
+#define knop_axis_1_ccw 34
+#define knop_axis_2_cw 33
+#define knop_axis_2_ccw 32
+#define knop_axis_3_cw 31
+#define knop_axis_3_ccw 30
+#define knop_axis_4_cw 29
+#define knop_axis_4_ccw 28
+#define knop_axis_5_cw 27
+#define knop_axis_5_ccw 26
+#define knop_axis_6_cw 25
+#define knop_axis_6_ccw 24
+#define knop_tool_cw 23
+#define knop_tool_ccw 22
 
-#define knop_joggen 36
-#define knop_noodstop 37
+
+#define knop_noodstop_kast 36 
+#define knop_stop_controller 37
 #define knop_reset 38
 #define knop_dodemans 39
 
@@ -56,14 +73,15 @@
 
 //switches
 #define switch_axis_1 40
-#define switch_axis_2 41
-#define switch_axis_3_cw 42
-#define switch_axis_3_ccw 43
-#define switch_axis_4 44
-#define switch_axis_5_cw 45
-#define switch_axis_5_ccw 46
-#define switch_axis_6 47 
-#define switch_axis_2_ccw 48 //als nodig is
+#define switch_axis_2_cw 41
+#define switch_axis_2_ccw 42 //als nodig is
+#define switch_axis_3_cw 43
+#define switch_axis_3_ccw 44
+#define switch_axis_4 45
+#define switch_axis_5_cw 46
+#define switch_axis_5_ccw 47
+#define switch_axis_6 48	//let op werkt andersom
+
 
 #define tool_servo_pin 49	//servo
 #define tool_servo2_pin 50
@@ -71,7 +89,7 @@
 //#define knop_enable_all_steppers 51
 // 52 is used by enable all steppers
 
-#define reserve 53 // is nog vrij
+#define power_steppers_off 53 // is nog vrij
 
 //12 analog ports
 //a0 - a11
@@ -82,12 +100,12 @@
 // Define stepper motor connections and motor interface type. Motor interface type must be set to 1 when using a driver:
 #define motorInterfaceType 1
 // Create a new instance of the AccelStepper class:
-AccelStepper stepper1 = AccelStepper(motorInterfaceType, stepPin1, dirPin6);
-AccelStepper stepper2 = AccelStepper(motorInterfaceType, stepPin2, dirPin5);
-AccelStepper stepper3 = AccelStepper(motorInterfaceType, stepPin3, dirPin4);
-AccelStepper stepper4 = AccelStepper(motorInterfaceType, stepPin4, dirPin3);
-AccelStepper stepper5 = AccelStepper(motorInterfaceType, stepPin5, dirPin2);
-AccelStepper stepper6 = AccelStepper(motorInterfaceType, stepPin6, dirPin1);
+AccelStepper stepper1 = AccelStepper(motorInterfaceType, stepPin1, dirPin1);
+AccelStepper stepper2 = AccelStepper(motorInterfaceType, stepPin2, dirPin2);
+AccelStepper stepper3 = AccelStepper(motorInterfaceType, stepPin3, dirPin3);
+AccelStepper stepper4 = AccelStepper(motorInterfaceType, stepPin4, dirPin4);
+AccelStepper stepper5 = AccelStepper(motorInterfaceType, stepPin5, dirPin5);
+AccelStepper stepper6 = AccelStepper(motorInterfaceType, stepPin6, dirPin6);
 
 MultiStepper steppers;
 
@@ -125,23 +143,43 @@ int servo_tool_pos = 1500; //set servo to midpoint 1500 (servo between 700 and 2
 
 void setup() {
 	// Set the maximum speed and acceleration:
+	Serial.begin(9600);
+	Serial.println("setup started");
+	pinMode(knop_axis_1_cw, INPUT);
+	pinMode(knop_axis_1_ccw, INPUT);
+	pinMode(knop_axis_2_cw, INPUT);
+	pinMode(knop_axis_2_ccw, INPUT);
+	pinMode(knop_axis_3_cw, INPUT);
+	pinMode(knop_axis_3_ccw, INPUT);
+	pinMode(knop_axis_4_cw, INPUT);
+	pinMode(knop_axis_4_ccw, INPUT);
+	pinMode(knop_axis_5_cw, INPUT);
+	pinMode(knop_axis_5_ccw, INPUT);
+	pinMode(knop_axis_6_cw, INPUT);
+	pinMode(knop_axis_6_ccw, INPUT);
+	pinMode(knop_axis_6_cw, INPUT);
+	pinMode(knop_tool_cw, INPUT);
+	pinMode(knop_tool_ccw, INPUT);
 
-	pinMode(knop_axis_1_cw, OUTPUT);
-	pinMode(knop_axis_1_ccw, OUTPUT);
-	pinMode(knop_axis_2_cw, OUTPUT);
-	pinMode(knop_axis_2_ccw, OUTPUT);
-	pinMode(knop_axis_3_cw, OUTPUT);
-	pinMode(knop_axis_3_ccw, OUTPUT);
-	pinMode(knop_axis_4_cw, OUTPUT);
-	pinMode(knop_axis_4_ccw, OUTPUT);
-	pinMode(knop_axis_5_cw, OUTPUT);
-	pinMode(knop_axis_5_ccw, OUTPUT);
-	pinMode(knop_axis_6_cw, OUTPUT);
-	pinMode(knop_axis_6_ccw, OUTPUT);
-	pinMode(knop_axis_6_cw, OUTPUT);
-	pinMode(knop_tool_cw, OUTPUT);
-	pinMode(knop_tool_ccw, OUTPUT);
-	pinMode(knop_joggen, OUTPUT);
+	pinMode(knop_stop_controller, INPUT);
+	pinMode(knop_reset, INPUT);
+	pinMode(knop_dodemans, INPUT);
+
+	pinMode(knop_noodstop_kast, INPUT);
+	pinMode(knop_enable_all_steppers, INPUT);
+
+	pinMode(switch_axis_1, INPUT);
+	pinMode(switch_axis_2_cw, INPUT);
+	pinMode(switch_axis_2_ccw, INPUT);
+	pinMode(switch_axis_3_cw, INPUT);
+	pinMode(switch_axis_3_ccw, INPUT);
+	pinMode(switch_axis_4, INPUT);
+	pinMode(switch_axis_5_cw, INPUT);
+	pinMode(switch_axis_5_ccw, INPUT);
+	pinMode(switch_axis_6, INPUT);	//werkt met nc
+
+	pinMode(power_steppers_off, OUTPUT);
+	pinMode(enable_all_steppers, OUTPUT);
 
 	stepper1.setMaxSpeed(1000);
 	stepper1.setAcceleration(500);
@@ -161,10 +199,11 @@ void setup() {
 	steppers.addStepper(stepper2);
 
 	servo_tool.attach(tool_servo_pin);
+	Serial.println("setup compleet");
 }
 
 
-void joggen() {	
+void joggen() {
 	/*
 	stepper1.setMaxSpeed(1000);
 	stepper1.setAcceleration(99999);
@@ -179,30 +218,32 @@ void joggen() {
 	stepper6.setMaxSpeed(1000);
 	stepper6.setAcceleration(99999);
 	*/
-	
+
 	//axis 1
-	if (knop_axis_1_cw == HIGH) {
-		stepper1.moveTo(stepper1.currentPosition() + 10);
+	if (digitalRead(knop_axis_1_cw) == HIGH) {
+		stepper1.moveTo(stepper1.currentPosition() + 1);
 		stepper1.setSpeed(1000);
 		stepper1.runSpeed();
+		//Serial.println("knop 1 cw");
 		//stepper1.run();
 	}
-	else if (knop_axis_1_ccw == HIGH) {
-		stepper1.moveTo(stepper1.currentPosition() - 10);
+	else if (digitalRead(knop_axis_1_ccw) == HIGH){
+		stepper1.moveTo(stepper1.currentPosition() - 1);
 		stepper1.setSpeed(1000);
 		stepper1.runSpeed();
+		//Serial.println(" knop 1 ccw ");
 	}
 	else {
 		stepper1.stop();
 	}
 	//axis 2
-	if (knop_axis_2_cw == HIGH) {
-		stepper2.moveTo(stepper2.currentPosition() + 10);
+	if (digitalRead(knop_axis_2_cw )== HIGH) {
+		stepper2.moveTo(stepper2.currentPosition() + 1);
 		stepper2.setSpeed(1000);
 		stepper2.runSpeed();
 	}
-	else if (knop_axis_2_ccw == HIGH) {
-		stepper2.moveTo(stepper2.currentPosition() - 10);
+	else if (digitalRead(knop_axis_2_ccw )== HIGH) {
+		stepper2.moveTo(stepper2.currentPosition() - 1);
 		stepper2.setSpeed(1000);
 		stepper2.runSpeed();
 	}
@@ -210,13 +251,13 @@ void joggen() {
 		stepper2.stop();
 	}
 	//axis 3
-	if (knop_axis_3_cw == HIGH) {
-		stepper3.moveTo(stepper1.currentPosition() + 10);
+	if (digitalRead(knop_axis_3_cw )== HIGH) {
+		stepper3.moveTo(stepper3.currentPosition() + 1);
 		stepper3.setSpeed(1000);
 		stepper3.runSpeed();
 	}
-	else if (knop_axis_3_ccw == HIGH) {
-		stepper3.moveTo(stepper3.currentPosition() - 10);
+	else if (digitalRead(knop_axis_3_ccw )== HIGH) {
+		stepper3.moveTo(stepper3.currentPosition() - 1);
 		stepper3.setSpeed(1000);
 		stepper3.runSpeed();
 	}
@@ -224,13 +265,13 @@ void joggen() {
 		stepper3.stop();
 	}
 	//axis 4
-	if (knop_axis_4_cw == HIGH) {
-		stepper4.moveTo(stepper4.currentPosition() + 10);
+	if (digitalRead(knop_axis_4_cw )== HIGH) {
+		stepper4.moveTo(stepper4.currentPosition() + 1);
 		stepper4.setSpeed(1000);
 		stepper4.runSpeed();
 	}
-	else if (knop_axis_4_ccw == HIGH) {
-		stepper4.moveTo(stepper4.currentPosition() - 10);
+	else if (digitalRead(knop_axis_4_ccw )== HIGH) {
+		stepper4.moveTo(stepper4.currentPosition() - 1);
 		stepper4.setSpeed(1000);
 		stepper4.runSpeed();
 	}
@@ -238,13 +279,13 @@ void joggen() {
 		stepper4.stop();
 	}
 	//axis 5
-	if (knop_axis_5_cw == HIGH) {
-		stepper5.moveTo(stepper5.currentPosition() + 10);
+	if (digitalRead(knop_axis_5_cw )== HIGH) {
+		stepper5.moveTo(stepper5.currentPosition() + 1);
 		stepper5.setSpeed(1000);
 		stepper5.runSpeed();
 	}
-	else if (knop_axis_5_ccw == HIGH) {
-		stepper5.moveTo(stepper5.currentPosition() - 10);
+	else if (digitalRead(knop_axis_5_ccw )== HIGH) {
+		stepper5.moveTo(stepper5.currentPosition() - 1);
 		stepper5.setSpeed(1000);
 		stepper5.runSpeed();
 	}
@@ -252,12 +293,12 @@ void joggen() {
 		stepper5.stop();
 	}
 	//axis 6
-	if (knop_axis_6_cw == HIGH) {
+	if (digitalRead(knop_axis_6_cw )== HIGH) {
 		stepper6.moveTo(stepper6.currentPosition() + 1);
 		stepper6.setSpeed(1000);
 		stepper6.runSpeed();
 	}
-	else if (knop_axis_6_ccw == HIGH) {
+	else if (digitalRead(knop_axis_6_ccw )== HIGH) {
 		stepper6.moveTo(stepper6.currentPosition() - 1);
 		stepper6.setSpeed(1000);
 		stepper6.runSpeed();
@@ -265,33 +306,49 @@ void joggen() {
 	else {
 		stepper6.stop();
 	}	
-	if (knop_tool_cw == HIGH) {
+	if (digitalRead(knop_tool_cw )== HIGH) {
 		servo_tool.writeMicroseconds(servo_tool_pos + 1);
 	}
-	else if (knop_tool_ccw == HIGH) {
+	else if (digitalRead(knop_tool_ccw )== HIGH) {
 		servo_tool.writeMicroseconds(servo_tool_pos - 1);
 	}
 }
 
+int check_switches() {
+	return 0;
+}
+
 void loop() {
 
-	if (knop_joggen == HIGH || softwarejoggen == 1) {
-		joggen();
+	if (!digitalRead(knop_noodstop_kast)) {
+		if (digitalRead(knop_reset)) {
+			digitalWrite(enable_all_steppers, LOW); // set all motors of
+			digitalWrite(power_steppers_off, LOW); //schakel relais weer in
+		}
+		if (digitalRead(knop_enable_all_steppers)) {
+			digitalWrite(enable_all_steppers, HIGH); // set all motors of
+		}
+		if (softwarejoggen == 1) {
+			joggen();
+			//Serial.print("in joggen");
+		}
+		else {
+			stepper1.setMaxSpeed(1000);
+			stepper1.setAcceleration(500);
+			stepper2.setMaxSpeed(1000);
+			stepper2.setAcceleration(500);
+			stepper3.setMaxSpeed(1000);
+			stepper3.setAcceleration(500);
+			stepper4.setMaxSpeed(1000);
+			stepper4.setAcceleration(500);
+			stepper5.setMaxSpeed(1000);
+			stepper5.setAcceleration(500);
+			stepper6.setMaxSpeed(1000);
+			stepper6.setAcceleration(500);
+		}
 	}
 	else {
-		stepper1.setMaxSpeed(1000);
-		stepper1.setAcceleration(500);
-		stepper2.setMaxSpeed(1000);
-		stepper2.setAcceleration(500);
-		stepper3.setMaxSpeed(1000);
-		stepper3.setAcceleration(500);
-		stepper4.setMaxSpeed(1000);
-		stepper4.setAcceleration(500);
-		stepper5.setMaxSpeed(1000);
-		stepper5.setAcceleration(500);
-		stepper6.setMaxSpeed(1000);
-		stepper6.setAcceleration(500);
+		digitalWrite(enable_all_steppers, HIGH); // set all motors of
+		digitalWrite(power_steppers_off, HIGH); //schakel relais
 	}
-
-
 }
