@@ -234,12 +234,12 @@ void joggen() {
     }
     else if (digitalRead(knop_axis_1_ccw) == HIGH) {
         stepper1.move(-1);
-        stepper1.setSpeed(1000);
-        stepper1.setPinsInverted(true,false, false);
+        stepper1.setSpeed(-1000);
+        //stepper1.setPinsInverted(true,false, false);
         stepper1.runSpeed();
-        stepper1.setPinsInverted(false,false, false); 
+        //stepper1.setPinsInverted(false,false, false); 
         //Serial.println(" knop 1 ccw ");
-        ///Serial.println(String(stepper1.currentPosition()));
+        //Serial.println(String(stepper1.currentPosition()));
         //Serial.println(String(stepper1.distanceToGo()));
         //Serial.println(digitalRead(dirPin1));
         
