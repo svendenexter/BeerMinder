@@ -131,6 +131,12 @@ int softwarehomen = 1;
 int softwarerunprogram = 0;
 
 int first_time_home = 0;
+int speed_stepper1 = 10000;
+int speed_stepper2 = 10000;
+int speed_stepper3 = 10000;
+int speed_stepper4 = 10000;
+int speed_stepper5 = 10000;
+int speed_stepper6 = 10000;
 #pragma endregion
 
 //variables
@@ -327,18 +333,18 @@ void setup() {
     pinMode(power_steppers_off, OUTPUT);
     pinMode(enable_all_steppers, OUTPUT);
 
-    stepper1.setMaxSpeed(1000);
-    stepper1.setAcceleration(500);
-    stepper2.setMaxSpeed(1000);
-    stepper2.setAcceleration(500);
-    stepper3.setMaxSpeed(1000);
-    stepper3.setAcceleration(500);
-    stepper4.setMaxSpeed(1000);
-    stepper4.setAcceleration(500);
-    stepper5.setMaxSpeed(1000);
-    stepper5.setAcceleration(500);
-    stepper6.setMaxSpeed(1000);
-    stepper6.setAcceleration(500);
+    stepper1.setMaxSpeed(3000);
+    stepper1.setAcceleration(1000);
+    stepper2.setMaxSpeed(3000);
+    stepper2.setAcceleration(1000);
+    stepper3.setMaxSpeed(3000);
+    stepper3.setAcceleration(1000);
+    stepper4.setMaxSpeed(3000);
+    stepper4.setAcceleration(1000);
+    stepper5.setMaxSpeed(3000);
+    stepper5.setAcceleration(1000);
+    stepper6.setMaxSpeed(3000);
+    stepper6.setAcceleration(1000);
 
     //om 2 steppers tegelijk aan te sturen gebruik steppers
     steppers.addStepper(stepper1);
@@ -1421,12 +1427,12 @@ void run_program() {
         move_to_stepper4 = -39;
         move_to_stepper5 = -1954;
         move_to_stepper6 = 2050;
-        Speed_max_stepper1 = 1000;
-        Speed_max_stepper2 = 3000;
-        Speed_max_stepper3 = 3000;
-        Speed_max_stepper4 = 1000;
-        Speed_max_stepper5 = 1500;
-        Speed_max_stepper6 = 1500;
+        Speed_max_stepper1 = speed_stepper1;
+        Speed_max_stepper2 = speed_stepper2;
+        Speed_max_stepper3 = speed_stepper3;
+        Speed_max_stepper4 = speed_stepper4;
+        Speed_max_stepper5 = speed_stepper5;
+        Speed_max_stepper6 = speed_stepper6;
         stop_stepper1 = 0;
         stop_stepper2 = 0;
         stop_stepper3 = 0;
@@ -1475,12 +1481,12 @@ void run_program() {
         move_to_stepper4 = -39;
         move_to_stepper5 = -610;
         move_to_stepper6 = 676;
-        Speed_max_stepper1 = 5000;
-        Speed_max_stepper2 = 2000;
-        Speed_max_stepper3 = 2000;
-        Speed_max_stepper4 = 2000;
-        Speed_max_stepper5 = 2000;
-        Speed_max_stepper6 = 2000;
+        Speed_max_stepper1 = speed_stepper1;
+        Speed_max_stepper2 = speed_stepper2;
+        Speed_max_stepper3 = speed_stepper3;
+        Speed_max_stepper4 = speed_stepper4;
+        Speed_max_stepper5 = speed_stepper5;
+        Speed_max_stepper6 = speed_stepper6;
         stop_stepper1 = 0;
         stop_stepper2 = 0;
         stop_stepper3 = 0;
@@ -1503,12 +1509,12 @@ void run_program() {
         move_to_stepper4 = -81;
         move_to_stepper5 = 1290;
         move_to_stepper6 = 2542;
-        Speed_max_stepper1 = 5000;
-        Speed_max_stepper2 = 3000;
-        Speed_max_stepper3 = 3000;
-        Speed_max_stepper4 = 1000;
-        Speed_max_stepper5 = 1500;
-        Speed_max_stepper6 = 1500;
+        Speed_max_stepper1 = speed_stepper1;
+        Speed_max_stepper2 = speed_stepper2;
+        Speed_max_stepper3 = speed_stepper3;
+        Speed_max_stepper4 = speed_stepper4;
+        Speed_max_stepper5 = speed_stepper5;
+        Speed_max_stepper6 = speed_stepper6;
         stop_stepper1 = 0;
         stop_stepper2 = 0;
         stop_stepper3 = 0;
@@ -1531,12 +1537,12 @@ void run_program() {
         move_to_stepper4 = -81;
         move_to_stepper5 = 442;
         move_to_stepper6 = 4361;
-        Speed_max_stepper1 = 2000;
-        Speed_max_stepper2 = 2000;
-        Speed_max_stepper3 = 2000;
-        Speed_max_stepper4 = 2000;
-        Speed_max_stepper5 = 2000;
-        Speed_max_stepper6 = 2000;
+        Speed_max_stepper1 = speed_stepper1;
+        Speed_max_stepper2 = speed_stepper2;
+        Speed_max_stepper3 = speed_stepper3;
+        Speed_max_stepper4 = speed_stepper4;
+        Speed_max_stepper5 = speed_stepper5;
+        Speed_max_stepper6 = speed_stepper6;
         stop_stepper1 = 0;
         stop_stepper2 = 0;
         stop_stepper3 = 0;
@@ -1601,12 +1607,12 @@ void run_program() {
         move_to_stepper4 = -431;
         move_to_stepper5 = -1577;
         move_to_stepper6 = -390;
-        Speed_max_stepper1 = 3000;
-        Speed_max_stepper2 = 3000;
-        Speed_max_stepper3 = 3000;
-        Speed_max_stepper4 = 3000;
-        Speed_max_stepper5 = 3000;
-        Speed_max_stepper6 = 3000;
+        Speed_max_stepper1 = 2000;
+        Speed_max_stepper2 = 2000;
+        Speed_max_stepper3 = 2000;
+        Speed_max_stepper4 = 2000;
+        Speed_max_stepper5 = 2000;
+        Speed_max_stepper6 = 2000;
         stop_stepper1 = 0;
         stop_stepper2 = 0;
         stop_stepper3 = 0;

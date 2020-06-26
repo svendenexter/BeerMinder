@@ -11,6 +11,7 @@
 #include <MultiStepper.h>
 #include <AccelStepper.h>
 
+
 // define pins
 #pragma region 
 
@@ -29,8 +30,9 @@
 
 #define enable_all_steppers 52
 
-// data poorten
-//14-21
+// data poorten 14 - 21
+#define rx_pin 0
+#define tx_pin 1
 
 //knoppen
 #define knop_axis_1_cw 35
@@ -94,7 +96,7 @@ AccelStepper stepper6 = AccelStepper(motorInterfaceType, stepPin6, dirPin6);
 
 MultiStepper steppers;
 
-Servo servo_tool;
+Servo servo_tool;  // pulse tussen 500 en 2500
 
 #pragma endregion 
 
@@ -116,23 +118,58 @@ Servo servo_tool;
 
 #pragma endregion 
 
-// global variabelen
+//LCD scherm
 #pragma region
-//variabelen voor snelle software verandering/instelling
+
+#pragma endregion
+
+// global variabeles
+#pragma region
+//variabelen voor snelle software verandering/instelling for testing
 int softwarejoggen = 0;
 int softwarehomen = 1;
 int softwarerunprogram = 0;
 
+int first_time_home = 0;
+int speed_stepper1 = 10000;
+int speed_stepper2 = 10000;
+int speed_stepper3 = 10000;
+int speed_stepper4 = 10000;
+int speed_stepper5 = 10000;
+int speed_stepper6 = 10000;
+#pragma endregion
+
+//variables
+#pragma region
+
+//LCD touchscreen variabels
+int currentpage = 0;
+
+//timer zooi
+int period1000 = 1000;
+int period1000_case10home = 1000;
+int period2000 = 2000;
+int period3000 = 3000;
+unsigned long time_now = 0;
 
 // set /reset variables
+
 int homeorder = 1;
+int program_order = 1;
+int dance_order = 1;
 bool is_moving = 0;
 bool use_movespeed = 1;
+bool use_moveto_withspeed = 0;
 bool ready_for_functions_call = 1;
 bool stop_moving = 1;
 bool joging = 0;
 bool homing = 0;
 bool printing_positions = 0;
+bool running_program = 0;
+bool dancing = 0;
+bool done_dancing = 0;
+
+bool button_pressed = 0;
 
 bool homed_axis1 = 0;
 bool homed_axis2 = 0;
@@ -144,7 +181,10 @@ bool homed_axis6 = 0;
 bool homed = 0;
 
 // start variabels of parameters
-int servo_tool_pos = 1500; //set servo to midpoint 1500 (servo between 700 and 2300 or 1000 and 2000)
+bool move_all_to = 0;
+long move_steppers[] = { 0, 0, 0, 0, 0, 0 };
+
+int servo_tool_pos = 1500; //// pulse tussen 500 en 2500
 int Speed_stepper1 = 0;
 int Speed_stepper2 = 0;
 int Speed_stepper3 = 0;
@@ -293,24 +333,28 @@ void setup() {
     pinMode(power_steppers_off, OUTPUT);
     pinMode(enable_all_steppers, OUTPUT);
 
-    stepper1.setMaxSpeed(1000);
-    stepper1.setAcceleration(500);
-    stepper2.setMaxSpeed(1000);
-    stepper2.setAcceleration(500);
-    stepper3.setMaxSpeed(1000);
-    stepper3.setAcceleration(500);
-    stepper4.setMaxSpeed(1000);
-    stepper4.setAcceleration(500);
-    stepper5.setMaxSpeed(1000);
-    stepper5.setAcceleration(500);
-    stepper6.setMaxSpeed(1000);
-    stepper6.setAcceleration(500);
+    stepper1.setMaxSpeed(3000);
+    stepper1.setAcceleration(1000);
+    stepper2.setMaxSpeed(3000);
+    stepper2.setAcceleration(1000);
+    stepper3.setMaxSpeed(3000);
+    stepper3.setAcceleration(1000);
+    stepper4.setMaxSpeed(3000);
+    stepper4.setAcceleration(1000);
+    stepper5.setMaxSpeed(3000);
+    stepper5.setAcceleration(1000);
+    stepper6.setMaxSpeed(3000);
+    stepper6.setAcceleration(1000);
 
     //om 2 steppers tegelijk aan te sturen gebruik steppers
-//    steppers.addStepper(stepper1);
-//    steppers.addStepper(stepper2);
+    steppers.addStepper(stepper1);
+    steppers.addStepper(stepper2);
+    steppers.addStepper(stepper3);
+    steppers.addStepper(stepper4);
+    steppers.addStepper(stepper5);
+    steppers.addStepper(stepper6);
 
-    servo_tool.attach(tool_servo_pin);
+    //servo_tool.attach(tool_servo_pin);
     Serial.println("setup compleet");
 }
 
@@ -519,7 +563,7 @@ void check_switches_for_move() {
             }
         }
     }
-    else if (!homing){
+    else if (!homing) {
         if (status_switch_axis_2_cw || status_switch_axis_2_ccw) {
             stop_stepper2;
         }
@@ -536,19 +580,22 @@ void check_switches_for_move() {
 
 void joggen() {
     joging = 1;
-    use_movespeed = 1;
+    if (button_pressed = 1) {
+        use_movespeed = 1;
+        use_moveto_withspeed = 0;
+    }
     //axis 1
     if (status_knop_axis_1_cw && status_knop_axis_1_ccw) {
         stop_stepper1 = 1;
     }
     else if (status_knop_axis_1_cw == HIGH) {
         move_stepper1 = 1;
-        Speed_stepper1 = 1000;
+        Speed_stepper1 = 10000;
         stop_stepper1 = 0;
     }
     else if (status_knop_axis_1_ccw == HIGH) {
         move_stepper1 = -1;
-        Speed_stepper1 = -1000;
+        Speed_stepper1 = -10000;
         stop_stepper1 = 0;
     }
     else {
@@ -577,7 +624,7 @@ void joggen() {
     }
     else if (status_knop_axis_3_cw == HIGH) {
         move_stepper3 = 1;
-        Speed_stepper3 = 1000;
+        Speed_stepper3 = 2000;
         stop_stepper3 = 0;
     }
     else if (status_knop_axis_3_ccw == HIGH) {
@@ -652,22 +699,31 @@ void joggen() {
     }
 
     if (status_knop_tool_cw == HIGH) {
-        servo_tool.writeMicroseconds(servo_tool_pos + 1);
+        servo_tool.attach(tool_servo_pin);
+        servo_tool.writeMicroseconds(550);
+        //servo_tool_pos++;
     }
     else if (status_knop_tool_ccw == HIGH) {
-        servo_tool.writeMicroseconds(servo_tool_pos - 1);
+        servo_tool.attach(tool_servo_pin);
+        servo_tool.writeMicroseconds(1900);
+        //servo_tool_pos--;        
     }
-
+    else if (status_knop_dodemans == 1){
+        servo_tool.detach();
+    }
     //when nothing pressed set ready for function call
     if (status_knop_axis_1_ccw || status_knop_axis_1_cw || status_knop_axis_2_ccw || status_knop_axis_2_cw || status_knop_axis_3_ccw || status_knop_axis_3_cw || status_knop_axis_4_ccw || status_knop_axis_4_cw || status_knop_axis_5_ccw || status_knop_axis_5_cw || status_knop_axis_6_ccw || status_knop_axis_6_cw || status_knop_tool_ccw || status_knop_tool_cw) {
         ready_for_functions_call = 0;
+        button_pressed = 1;
     }
     else {
         ready_for_functions_call = 1;
+        button_pressed = 0;
     }
 }
 
 int home_all_axis() {
+    printPosition();
     homing = 1;
     ready_for_functions_call = 0;
 
@@ -675,15 +731,29 @@ int home_all_axis() {
     case 0:
         if (!homed) {
             homeorder = 1;
+
         }
         break;
-    case 1: //axis 6
+    case 1:
+        //servo_tool.attach(tool_servo_pin);
+      //  servo_tool.writeMicroseconds(1500);
+        static unsigned long time2 = millis();
+        if (millis() >= time2 + 2000) {
+            homeorder = 5;
+         //   servo_tool.detach();
+        }
+        break;
+    case 5: //axis 6
+        
         if (status_switch_axis_6 == HIGH) {
-            homed_axis6 = 1; //geen set point deze komt in axis 5
-            homeorder = 2;
+            homed_axis6 = 1;
+            stepper5.setCurrentPosition(0); // een nulpunt om beter daarna beter 0 nulpunt te setten
+            stepper6.setCurrentPosition(0);
+            homeorder = 7;
         }
         else {
             use_movespeed = 1;
+            use_moveto_withspeed = 0;
             move_stepper5 = 1;
             move_stepper6 = 1;
             Speed_stepper5 = 1000;
@@ -692,122 +762,249 @@ int home_all_axis() {
             stop_stepper6 = 0;
             homed_axis6 = 0;
         }
-
         break;
-    case 2: //axis 5
+    case 7: //axis  ga even iets terug
+        use_movespeed = 1;
+        use_moveto_withspeed = 1;
+        move_to_stepper5 = -1000; // iets terugdraaien na het nullen om opnieuw te homen
+        move_to_stepper6 = -1000;
+        Speed_stepper5 = -1000;
+        Speed_stepper6 = -1000;
+        stop_stepper5 = 0;
+        stop_stepper6 = 0;
+        homed_axis6 = 0;
+        if ( stepper5.currentPosition() == move_to_stepper5 && 
+            stepper6.currentPosition() == move_to_stepper6) {
+
+            Serial.println(" position away from switch 6 reached ");
+            homeorder = 8;
+        }
+        break;
+    case 8: //axis 6
+        if (status_switch_axis_6 == HIGH) {
+            homed_axis6 = 1;
+            stepper5.setCurrentPosition(0); // HET ECHTE NULPUNT AXIS 6 (later wel reset door axis 5
+            stepper6.setCurrentPosition(0);
+            homeorder = 10;  
+        }
+        else {
+            use_movespeed = 1;
+            use_moveto_withspeed = 0;
+            move_stepper5 = 1;
+            move_stepper6 = 1;
+            Speed_stepper5 = 100;
+            Speed_stepper6 = 100;
+            stop_stepper5 = 0;
+            stop_stepper6 = 0;
+            homed_axis6 = 0;
+        }
+        break;
+    case 10: //axis 5
         if (status_switch_axis_5_cw == HIGH) {
             homed_axis5 = 1;
             stepper5.setCurrentPosition(0);
             stepper6.setCurrentPosition(0);
-            homeorder = 5;
+            homeorder = 12;
         }
         else {
             use_movespeed = 1;
+            use_moveto_withspeed = 0;
             move_stepper5 = 1;
             move_stepper6 = -1;
             Speed_stepper5 = 1000;
             Speed_stepper6 = -1000;
             stop_stepper5 = 0;
             stop_stepper6 = 0;
-            homed_axis6 = 0;
+            homed_axis5 = 0;
         }
         break;
-        /*
-            case 5: // move axis 5 ccw so switch is not pressed
-                use_movespeed = 0;
-                move_to_stepper5 = -1000;
-                move_to_stepper6 = 1000;
-                Speed_max_stepper5 = 1000;
-                Speed_max_stepper6 = 1000;
-                stop_stepper5 = 0;
-                stop_stepper6 = 0;
-                if (stepper5.currentPosition() == move_to_stepper5 && stepper6.currentPosition() == move_to_stepper6) {
-                    Serial.println(" moved away from switch axis 5 ");
-                    homeorder = 6;
-                }
-                break;
-            case 6: // move axis 6 ccw so swich is not pressed
-                use_movespeed = 0;
-                move_to_stepper5 = -3000;
-                move_to_stepper6 = -1000;
-                Speed_max_stepper5 = 1000;
-                Speed_max_stepper6 = 1000;
-                stop_stepper5 = 0;
-                stop_stepper6 = 0;
-                if (stepper5.currentPosition() == move_to_stepper5 && stepper6.currentPosition() == move_to_stepper6) {
-                    Serial.println(" moved away from switch axis 6 ");
-                    homeorder = 20;
-                }
-                break;
-        */
-    case 5: //axis 4
 
+
+    case 12: //axis  5  ga even iets terug
+        use_movespeed = 1;
+        use_moveto_withspeed = 1;
+        move_to_stepper5 = -750; // iets terugdraaien na het nullen om opnieuw te homen
+        move_to_stepper6 = 750;
+        Speed_stepper5 = -1000;
+        Speed_stepper6 = 1000;
+        stop_stepper5 = 0;
+        stop_stepper6 = 0;
+        homed_axis5 = 0;
+        if (stepper5.currentPosition() == move_to_stepper5 &&
+            stepper6.currentPosition() == move_to_stepper6) {
+
+            Serial.println(" position away from switch 5 reached ");
+            homeorder = 13;
+        }
+        break;
+    case 13: //axis 5   SET ZERO point stepper 5 and 6
+        if (status_switch_axis_5_cw == HIGH) {
+            homed_axis5 = 1;
+            stepper5.setCurrentPosition(0); // HET ECHTE NULPUNT stepper 5 
+            stepper6.setCurrentPosition(0); // HET ECHTE NULPUNT stepper 5
+            homeorder = 15;
+        }
+        else {
+            use_movespeed = 1;
+            use_moveto_withspeed = 0;
+            move_stepper5 = 1;
+            move_stepper6 = -1;
+            Speed_stepper5 = 100;
+            Speed_stepper6 = -100;
+            stop_stepper5 = 0;
+            stop_stepper6 = 0;
+            homed_axis5 = 0;
+        }
+        break;
+
+    case 15: //axis 4 first zero point
         if (status_switch_axis_4 == HIGH) {
             homed_axis4 = 1;
             stepper4.setCurrentPosition(0);
-            homeorder = 10;
+            homeorder = 17;
         }
         else {
             //Serial.println("in else");
             use_movespeed = 1;
-            move_stepper4 = 1;
+            use_moveto_withspeed = 0;
+            move_stepper4 = 0;
             Speed_stepper4 = 1000;
             stop_stepper4 = 0;
             homed_axis4 = 0;
         }
         break;
-        /*
-            case 21:
-                use_movespeed = 0;
-                move_to_stepper4 = -10000;
-                Speed_max_stepper4 = 1000;
-                stop_stepper4 = 0;
-                if (stepper4.currentPosition() == move_to_stepper4) {
-                    homeorder = 30;
-                }
-                break;
-        */
-    case 10: //axis 3  move CCW !! and axis 2 cw
+    case 17: //axis 4 ga even iets terug
+        use_movespeed = 1;
+        use_moveto_withspeed = 1;
+        move_to_stepper4 = -750; // iets terugdraaien na het nullen om opnieuw te homen
+        Speed_stepper4 = -1000;
+        stop_stepper4 = 0;
+        homed_axis4 = 0;
+        if (stepper4.currentPosition() == move_to_stepper4 ) {
+            Serial.println(" position away from switch 4 reached ");
+            homeorder = 18;
+        }
+        break;
+
+    case 18: //axis 4 zeropoint
+        if (status_switch_axis_4 == HIGH) {
+            homed_axis4 = 1;
+            stepper4.setCurrentPosition(0); // HET ECHTE NULPUNT AXIS 6 (later wel reset door axis 5
+            homeorder = 20;
+        }
+        else {
+            use_movespeed = 1;
+            use_moveto_withspeed = 0;
+            move_stepper4 = 1;
+            Speed_stepper4 = 100;
+            stop_stepper4 = 0;
+            homed_axis4 = 0;
+        }
+        break;
+
+    case 20: //axis 3  move CW 
         if (!homed_axis3) {
-            if (status_switch_axis_3_ccw == HIGH) {
+            if (status_switch_axis_3_cw == HIGH) {
                 homed_axis3 = 1;
                 stepper3.setCurrentPosition(0);
-                homeorder = 20;
+                homeorder = 22;
             }
             else {
                 use_movespeed = 1;
-                move_stepper3 = -1;
-                Speed_stepper3 = -1000;
+                use_moveto_withspeed = 0;
+                move_stepper3 = 1;
+                Speed_stepper3 = 4000;
                 stop_stepper3 = 0;
                 homed_axis3 = 0;
             }
         }
         break;
-    case 20:
+
+    case 22: //axis 3 ga even iets terug
+        use_movespeed = 1;
+        use_moveto_withspeed = 1;
+        move_to_stepper3 = -2000; // iets terugdraaien na het nullen om opnieuw te homen
+        Speed_stepper3 = -1500;
+        stop_stepper3 = 0;
+        homed_axis3 = 0;
+        if (stepper3.currentPosition() == move_to_stepper3) {
+            Serial.println(" position away from switch 3 reached ");
+            homeorder = 23;
+        }
+        break;
+    case 23: //axis 3 zeropoint
+        if (status_switch_axis_3_cw == HIGH) {
+            homed_axis3 = 1;
+            stepper3.setCurrentPosition(0); // echt nulpunt axis 3
+            homeorder = 25;
+        }
+        else {
+            use_movespeed = 1;
+            use_moveto_withspeed = 0;
+            move_stepper3 = 1;
+            Speed_stepper3 = 100;
+            stop_stepper3 = 0;
+            homed_axis3 = 0;
+        }
+        break;
+
+    case 25: //axis 2 first homepoint
         if (!homed_axis2) {
-            if (status_switch_axis_2_cw == HIGH) {
+            if (status_switch_axis_2_ccw == HIGH) {
                 homed_axis2 = 1;
                 stepper2.setCurrentPosition(0);
-                homeorder = 30;
+                homeorder = 27;
             }
             else {
                 use_movespeed = 1;
-                move_stepper2 = 1;
-                Speed_stepper2 = 1000;
+                use_moveto_withspeed = 0;
+                move_stepper2 = -1;
+                Speed_stepper2 = -500;
                 stop_stepper2 = 0;
                 homed_axis2 = 0;
             }
         }
         break;
+
+    case 27: //axis 2 ga even iets terug
+        use_movespeed = 1;
+        use_moveto_withspeed = 1;
+        move_to_stepper2 = 750; // iets terugdraaien na het nullen om opnieuw te homen
+        Speed_stepper2 = 1000;
+        stop_stepper2 = 0;
+        homed_axis2 = 0;
+        if (stepper2.currentPosition() == move_to_stepper2) {
+            Serial.println(" position away from switch 2 reached ");
+            homeorder = 28;
+        }
+        break;
+
+    case 28: //axis 2 zeropoint
+        if (status_switch_axis_2_ccw == HIGH) {
+            homed_axis2 = 1;
+            stepper2.setCurrentPosition(0); //echt nulpunt axis 2
+            homeorder = 30;
+        }
+        else {
+            use_movespeed = 1;
+            use_moveto_withspeed = 0;
+            move_stepper2 = -1;
+            Speed_stepper2 = -100;
+            stop_stepper2 = 0;
+            homed_axis2 = 0;
+        }
+        break;
+
     case 30: //axis 1
         if (!homed_axis1) {
             if (status_switch_axis_1 == HIGH) {
-                homed_axis1 = 1;
+                homed_axis1 = 0;
                 stepper1.setCurrentPosition(0);
-                homeorder = 40;
+                homeorder = 32;
             }
             else {
                 use_movespeed = 1;
+                use_moveto_withspeed = 0;
                 move_stepper1 = 1;
                 Speed_stepper1 = 1000;
                 stop_stepper1 = 0;
@@ -815,6 +1012,36 @@ int home_all_axis() {
             }
         }
         break;
+    case 32: //axis 1 ga even iets terug
+        use_movespeed = 1;
+        use_moveto_withspeed = 1;
+        move_to_stepper1 = -1250; // iets terugdraaien na het nullen om opnieuw te homen
+        Speed_stepper1 = -1500;
+        stop_stepper1 = 0;
+        homed_axis1 = 0;
+        if (stepper1.currentPosition() == move_to_stepper1) {
+            Serial.println(" position away from switch 1 reached ");
+            homeorder = 33;
+        }
+        break;
+
+    case 33: //axis 1 zeropoint
+        if (status_switch_axis_1 == HIGH) {
+            homed_axis1 = 1;
+            stepper1.setCurrentPosition(0); //echt nulpunt axis 1
+            homeorder = 40;
+        }
+        else {
+            use_movespeed = 1;
+            use_moveto_withspeed = 0;
+            move_stepper1 = 1;
+            Speed_stepper1 = 100;
+            stop_stepper1 = 0;
+            homed_axis1 = 0;
+        }
+        break;
+
+
     case 40: //if not all switches are pressed run home all axis again
         if (!(homed_axis1 && homed_axis2 && homed_axis3 && homed_axis4 && homed_axis5 && homed_axis6)) {
             homeorder = 1;
@@ -831,7 +1058,7 @@ int home_all_axis() {
 }
 
 void control_stepper() {
-    check_switches_for_move(); 
+    check_switches_for_move();
     if (stop_moving == HIGH) {
         stepper1.stop();
         stepper2.stop();
@@ -840,105 +1067,160 @@ void control_stepper() {
         stepper5.stop();
         stepper6.stop();
     }
-    else {
+    else if (move_all_to == 0) {
         if (stop_stepper1 == HIGH) {
             stepper1.stop();
         }
-        else if (use_movespeed == HIGH) {
+        else if (use_movespeed == HIGH && use_moveto_withspeed == HIGH) {
+            stepper1.moveTo(move_to_stepper1);
             stepper1.setSpeed(Speed_stepper1);
+            stepper1.runSpeed();
+        }
+        else if (use_movespeed == HIGH) {
             stepper1.move(move_stepper1);
+            stepper1.setSpeed(Speed_stepper1);
             stepper1.runSpeed();
         }
         else {
-            stepper1.setMaxSpeed(Speed_max_stepper1);
             stepper1.moveTo(move_to_stepper1);
+            stepper1.setMaxSpeed(Speed_max_stepper1);
             stepper1.run();
         }
         if (stop_stepper2 == HIGH) {
             stepper2.stop();
         }
-        else if (use_movespeed == HIGH) {
+        else if (use_movespeed == HIGH && use_moveto_withspeed == HIGH) {
+            stepper2.moveTo(move_to_stepper2);
             stepper2.setSpeed(Speed_stepper2);
+            stepper2.runSpeed();
+        }
+        else if (use_movespeed == HIGH) {
             stepper2.move(move_stepper2);
-            stepper2.runSpeed();            
+            stepper2.setSpeed(Speed_stepper2);
+            stepper2.runSpeed();
         }
         else {
-            stepper2.setMaxSpeed(Speed_max_stepper2);
             stepper2.moveTo(move_to_stepper2);
+            stepper2.setMaxSpeed(Speed_max_stepper2);
             stepper2.run();
         }
         if (stop_stepper3 == HIGH) {
             stepper3.stop();
         }
-        else if (use_movespeed == HIGH) {
+        else if (use_movespeed == HIGH && use_moveto_withspeed == HIGH) {
+            stepper3.moveTo(move_to_stepper3);
             stepper3.setSpeed(Speed_stepper3);
+            stepper3.runSpeed();
+        }
+        else if (use_movespeed == HIGH) {
             stepper3.move(move_stepper3);
+            stepper3.setSpeed(Speed_stepper3);
             stepper3.runSpeed();
         }
         else {
-            stepper3.setMaxSpeed(Speed_max_stepper3);
             stepper3.moveTo(move_to_stepper3);
+            stepper3.setMaxSpeed(Speed_max_stepper3);
             stepper3.run();
         }
         if (stop_stepper4 == HIGH) {
             stepper4.stop();
         }
-        else if (use_movespeed == HIGH) {
-
-
+        else if (use_movespeed == HIGH && use_moveto_withspeed == HIGH) {
+            stepper4.moveTo(move_to_stepper4);
             stepper4.setSpeed(Speed_stepper4);
-            stepper4.move(move_stepper4);
             stepper4.runSpeed();
- 
+        }
+        else if (use_movespeed == HIGH) {
+            stepper4.move(move_stepper4);
+            stepper4.setSpeed(Speed_stepper4);
+            stepper4.runSpeed();
         }
         else {
-            stepper4.setMaxSpeed(Speed_max_stepper4);
             stepper4.moveTo(move_to_stepper4);
+            stepper4.setMaxSpeed(Speed_max_stepper4);
             stepper4.run();
         }
         if (stop_stepper5 == HIGH) {
             stepper5.stop();
         }
-        else if (use_movespeed == HIGH) {
+        else if (use_movespeed == HIGH && use_moveto_withspeed == HIGH) {
+            stepper5.moveTo(move_to_stepper5);
             stepper5.setSpeed(Speed_stepper5);
+            stepper5.runSpeed();
+        }
+        else if (use_movespeed == HIGH) {
             stepper5.move(move_stepper5);
+            stepper5.setSpeed(Speed_stepper5);
             stepper5.runSpeed();
         }
         else {
-            stepper5.setMaxSpeed(Speed_max_stepper5);
             stepper5.moveTo(move_to_stepper5);
+            stepper5.setMaxSpeed(Speed_max_stepper5);
             stepper5.run();
         }
         if (stop_stepper6 == HIGH) {
             stepper6.stop();
         }
-        else if (use_movespeed == HIGH) {
+        else if (use_movespeed == HIGH && use_moveto_withspeed == HIGH) {
+            stepper6.moveTo(move_to_stepper6);
             stepper6.setSpeed(Speed_stepper6);
+            stepper6.runSpeed();
+        }
+        else if (use_movespeed == HIGH) {
             stepper6.move(move_stepper6);
+            stepper6.setSpeed(Speed_stepper6);
             stepper6.runSpeed();
         }
         else {
-            stepper6.setMaxSpeed(Speed_max_stepper6);
             stepper6.moveTo(move_to_stepper6);
+            stepper6.setMaxSpeed(Speed_max_stepper6);
             stepper6.run();
         }
-        //endeffector
-
-        move_stepper1 = 0;
-        move_stepper2 = 0;
-        move_stepper3 = 0;
-        move_stepper4 = 0;
-        move_stepper5 = 0;
-        move_stepper6 = 0;
-
-        Speed_stepper1 = 0;
-        Speed_stepper2 = 0;
-        Speed_stepper3 = 0;
-        Speed_stepper4 = 0;
-        Speed_stepper5 = 0;
-        Speed_stepper6 = 0;
-        
     }
+    /*
+    else if (move_all_to == 1) {
+        //beetje dubbel in code voor multistepper
+        if (stop_stepper1 == HIGH || stop_stepper2 == HIGH || stop_stepper3 == HIGH || stop_stepper4 == HIGH || stop_stepper5 == HIGH || stop_stepper6 == HIGH) {
+            stepper1.stop();
+            stepper2.stop();
+            stepper3.stop();
+            stepper4.stop();
+            stepper5.stop();
+            stepper6.stop();
+            move_all_to = 0;
+        }
+        else {
+            move_all_to = 0;
+            move_steppers[0] = move_to_stepper1;
+            move_steppers[1] = move_to_stepper2;
+            move_steppers[2] = move_to_stepper3;
+            move_steppers[3] = move_to_stepper4;
+            move_steppers[4] = move_to_stepper5;
+            move_steppers[5] = move_to_stepper6;
+
+            steppers.moveTo(move_steppers);
+            steppers.run();
+        }
+    }
+    */
+    //servo_tool.writeMicroseconds(servo_tool_pos);
+
+    //endeffector
+    move_all_to = 0;
+
+    move_stepper1 = 0;
+    move_stepper2 = 0;
+    move_stepper3 = 0;
+    move_stepper4 = 0;
+    move_stepper5 = 0;
+    move_stepper6 = 0;
+
+    Speed_stepper1 = 0;
+    Speed_stepper2 = 0;
+    Speed_stepper3 = 0;
+    Speed_stepper4 = 0;
+    Speed_stepper5 = 0;
+    Speed_stepper6 = 0;
 }
 
 void printPosition() {
@@ -958,7 +1240,7 @@ void printPosition() {
 
     static int In_function = 999;
 
-    static int lastprintposition = 999;
+    //static int lastprintposition = 999;
     bool printposition = status_knop_reset; //veranderen naar scherm input misschien ?
 
     // print inside function
@@ -968,91 +1250,91 @@ void printPosition() {
         In_function = 1;
     }
 
-
     //axis 1
     if (last_var1_cw != status_knop_axis_1_cw || printposition == 1) {
-        Serial.print("axis 1 position = ");
+        Serial.print("move_to_stepper1 = ");
         Serial.print(stepper1.currentPosition());
         Serial.println(" ");
     }
     last_var1_cw = status_knop_axis_1_cw;
     if (last_var1_ccw != status_knop_axis_1_ccw || printposition == 1) {
-        Serial.print("axis 1 position = ");
+        Serial.print("move_to_stepper1 = ");
         Serial.print(stepper1.currentPosition());
         Serial.println(" ");
     }
-    last_var1_ccw= status_knop_axis_1_ccw;
+    last_var1_ccw = status_knop_axis_1_ccw;
     //axis 2
     if (last_var2_cw != status_knop_axis_2_cw || printposition == 1) {
-        Serial.print("axis 2 position = ");
+        Serial.print("move_to_stepper2 = ");
         Serial.print(stepper2.currentPosition());
         Serial.println(" ");
     }
     last_var2_cw = status_knop_axis_2_cw;
     if (last_var2_ccw != status_knop_axis_2_ccw || printposition == 1) {
-        Serial.print("axis 2 position = ");
+        Serial.print("move_to_stepper2 = ");
         Serial.print(stepper2.currentPosition());
         Serial.println(" ");
     }
     last_var2_ccw = status_knop_axis_2_ccw;
     //axis 3
     if (last_var3_cw != status_knop_axis_3_cw || printposition == 1) {
-        Serial.print("axis 3 position = ");
+        Serial.print("move_to_stepper3 = ");
         Serial.print(stepper3.currentPosition());
         Serial.println(" ");
     }
     last_var3_cw = status_knop_axis_3_cw;
     if (last_var3_ccw != status_knop_axis_3_ccw || printposition == 1) {
-        Serial.print("axis 3 position = ");
+        Serial.print("move_to_stepper3 = ");
         Serial.print(stepper3.currentPosition());
         Serial.println(" ");
     }
     last_var3_ccw = status_knop_axis_3_ccw;
     //axis 4
     if (last_var4_cw != status_knop_axis_4_cw || printposition == 1) {
-        Serial.print("axis 4 position = ");
+        Serial.print("move_to_stepper4 = ");
         Serial.print(stepper4.currentPosition());
         Serial.println(" ");
     }
     last_var4_cw = status_knop_axis_4_cw;
     if (last_var4_ccw != status_knop_axis_4_ccw || printposition == 1) {
-        Serial.print("axis 4 position = ");
+        Serial.print("move_to_stepper4 = ");
         Serial.print(stepper4.currentPosition());
         Serial.println(" ");
     }
     last_var4_ccw = status_knop_axis_4_ccw;
     //axis 5
     if (last_var5_cw != status_knop_axis_5_cw || printposition == 1) {
-        Serial.print("axis 5 position = ");
+        Serial.print("move_to_stepper5 = ");
         Serial.print(stepper5.currentPosition());
         Serial.println(" ");
     }
     last_var5_cw = status_knop_axis_5_cw;
     if (last_var5_ccw != status_knop_axis_5_ccw || printposition == 1) {
-        Serial.print("axis 5 position = ");
+        Serial.print("move_to_stepper5 = ");
         Serial.print(stepper5.currentPosition());
         Serial.println(" ");
     }
     last_var5_ccw = status_knop_axis_5_ccw;
     //axis 6
     if (last_var6_cw != status_knop_axis_6_cw || printposition == 1) {
-        Serial.print("axis 6 position = ");
+        Serial.print("move_to_stepper6 = ");
         Serial.print(stepper6.currentPosition());
         Serial.println(" ");
     }
     last_var6_cw = status_knop_axis_6_cw;
     if (last_var6_ccw != status_knop_axis_6_ccw || printposition == 1) {
-        Serial.print("axis 6 position = ");
+        Serial.print("move_to_stepper6 = ");
         Serial.print(stepper6.currentPosition());
         Serial.println(" ");
     }
     last_var6_ccw = status_knop_axis_6_ccw;
-    lastprintposition = printposition;
+
+    //  lastprintposition = printposition;
 }
 
 void print() {
     static int last_stopvar = 999;
-   
+
 
     static int last_var1 = 999;
     if (last_var1 != homeorder || last_stopvar != stop_moving) {
@@ -1063,28 +1345,12 @@ void print() {
     last_var1 = homeorder;
 
     static int last_var2 = 999;
-    if (last_var2 != status_knop_enable_all_steppers || last_stopvar != stop_moving) {
-        Serial.print(" status_knop_enable_all_steppers  = ");
-        Serial.print(status_knop_enable_all_steppers);
+    if (last_var2 != homing || last_stopvar != stop_moving) {
+        Serial.print(" homing  = ");
+        Serial.print(homing);
         Serial.println(" ");
     }
-    last_var2 = status_knop_enable_all_steppers;
-
-    static int last_var3 = 999;
-    if (last_var3 != status_knop_reset || last_stopvar != stop_moving) {
-        Serial.print(" status_knop_reset  = ");
-        Serial.print(status_knop_reset);
-        Serial.println(" ");
-    }
-    last_var3 = status_knop_reset;
-
-    static int last_var4 = 999;
-    if (last_var4 != stop_moving || last_stopvar != stop_moving) {
-        Serial.print(" stop_moving  = ");
-        Serial.print(stop_moving);
-        Serial.println(" ");
-    }
-    last_var4 = stop_moving;
+    last_var2 = homing;
 
     static int last_var5 = 999;
     if (last_var5 != homed || last_stopvar != stop_moving) {
@@ -1093,7 +1359,445 @@ void print() {
         Serial.println(" ");
     }
     last_var5 = homed;
+
+    static int last_var3 = 999;
+    if (last_var3 != joging || last_stopvar != stop_moving) {
+        Serial.print(" joging  = ");
+        Serial.print(joging);
+        Serial.println(" ");
+    }
+    last_var3 = joging;
+
+    static int last_var4 = 999;
+    if (last_var4 != printing_positions || last_stopvar != stop_moving) {
+        Serial.print(" printing_positions  = ");
+        Serial.print(printing_positions);
+        Serial.println(" ");
+    }
+    last_var4 = printing_positions;
+
+    //var 5 gebruikt na 2 gezet
+
+    static int last_var6 = 999;
+    if (last_var6 != running_program || last_stopvar != stop_moving) {
+        Serial.print(" running_program  = ");
+        Serial.print(running_program);
+        Serial.println(" ");
+    }
+    last_var6 = running_program;
+
+    static int last_var7 = 999;
+    if (last_var7 != program_order || last_stopvar != stop_moving) {
+        Serial.print(" program_order  = ");
+        Serial.print(program_order);
+        Serial.println(" ");
+    }
+    last_var7 = program_order;
+
+    static int last_var8 = 999;
+    if (last_var8 != use_moveto_withspeed || last_stopvar != stop_moving) {
+        Serial.print(" use_moveto_withspeed  = ");
+        Serial.print(use_moveto_withspeed);
+        Serial.println(" ");
+    }
+    last_var8 = use_moveto_withspeed;
+
+    static int last_var9 = 999;
+    if (last_var9 != use_movespeed || last_stopvar != stop_moving) {
+        Serial.print(" use_movespeed  = ");
+        Serial.print(use_movespeed);
+        Serial.println(" ");
+    }
+    last_var9 = use_movespeed;
+
+    
     last_stopvar = stop_moving;
+}
+
+void run_program() {
+    running_program = 1;
+    //ready_for_functions_call = 0;
+    switch (program_order) {
+    case 1: // first position to go
+        use_movespeed = 0;
+        use_moveto_withspeed = 0;
+        move_to_stepper1 = 1581;
+        move_to_stepper2 = 10169;
+        move_to_stepper3 = -10970;
+        move_to_stepper4 = -39;
+        move_to_stepper5 = -1954;
+        move_to_stepper6 = 2050;
+        Speed_max_stepper1 = speed_stepper1;
+        Speed_max_stepper2 = speed_stepper2;
+        Speed_max_stepper3 = speed_stepper3;
+        Speed_max_stepper4 = speed_stepper4;
+        Speed_max_stepper5 = speed_stepper5;
+        Speed_max_stepper6 = speed_stepper6;
+        stop_stepper1 = 0;
+        stop_stepper2 = 0;
+        stop_stepper3 = 0;
+        stop_stepper4 = 0;
+        stop_stepper5 = 0;
+        stop_stepper6 = 0;
+        move_all_to = 0; // alles teglijk aansturen 
+
+        if (stepper1.currentPosition() == move_to_stepper1 && stepper2.currentPosition() == move_to_stepper2 && stepper3.currentPosition() == move_to_stepper3 && stepper4.currentPosition() == move_to_stepper4 && stepper5.currentPosition() == move_to_stepper5 && stepper6.currentPosition() == move_to_stepper6) {
+            Serial.println(" position 1 reached ");
+            program_order = 9;
+        }
+        break;
+    case 9:
+        program_order = 10;
+        static unsigned long time10 = millis();
+        time10 = millis();
+        break;
+    case 10:
+
+        servo_tool.attach(tool_servo_pin);
+        servo_tool.writeMicroseconds(1500);        
+        if (millis() >= time10 + 1000) {
+            program_order = 11;
+            servo_tool.detach();   
+        }
+    case 11:
+        static unsigned long time11 = millis();
+        time11 = millis();
+        program_order = 12;
+        break;
+    case 12:
+        servo_tool.attach(tool_servo_pin);
+        servo_tool.writeMicroseconds(500);
+        if (millis() >= time11 + 1000) {
+            program_order = 20;
+            servo_tool.detach();
+        }
+        break;
+    case 20: // second position to go
+        use_movespeed = 0;
+        use_moveto_withspeed = 0;
+        move_to_stepper1 = 1581;
+        move_to_stepper2 = 8731;
+        move_to_stepper3 = -21454;
+        move_to_stepper4 = -39;
+        move_to_stepper5 = -610;
+        move_to_stepper6 = 676;
+        Speed_max_stepper1 = speed_stepper1;
+        Speed_max_stepper2 = speed_stepper2;
+        Speed_max_stepper3 = speed_stepper3;
+        Speed_max_stepper4 = speed_stepper4;
+        Speed_max_stepper5 = speed_stepper5;
+        Speed_max_stepper6 = speed_stepper6;
+        stop_stepper1 = 0;
+        stop_stepper2 = 0;
+        stop_stepper3 = 0;
+        stop_stepper4 = 0;
+        stop_stepper5 = 0;
+        stop_stepper6 = 0;
+        move_all_to = 0; // alles teglijk aansturen 
+
+        if (stepper1.currentPosition() == move_to_stepper1 && stepper2.currentPosition() == move_to_stepper2 && stepper3.currentPosition() == move_to_stepper3 && stepper4.currentPosition() == move_to_stepper4 && stepper5.currentPosition() == move_to_stepper5 && stepper6.currentPosition() == move_to_stepper6) {
+            Serial.println(" position 2 reached ");
+            program_order = 25;
+        }
+        break;
+    case 25: // third position to go
+        use_movespeed = 0;
+        use_moveto_withspeed = 0;
+        move_to_stepper1 = -18127;
+        move_to_stepper2 = 9308;
+        move_to_stepper3 = -24061;
+        move_to_stepper4 = -81;
+        move_to_stepper5 = 1290;
+        move_to_stepper6 = 2542;
+        Speed_max_stepper1 = speed_stepper1;
+        Speed_max_stepper2 = speed_stepper2;
+        Speed_max_stepper3 = speed_stepper3;
+        Speed_max_stepper4 = speed_stepper4;
+        Speed_max_stepper5 = speed_stepper5;
+        Speed_max_stepper6 = speed_stepper6;
+        stop_stepper1 = 0;
+        stop_stepper2 = 0;
+        stop_stepper3 = 0;
+        stop_stepper4 = 0;
+        stop_stepper5 = 0;
+        stop_stepper6 = 0;
+        move_all_to = 0; // alles teglijk aansturen 
+
+        if (stepper1.currentPosition() == move_to_stepper1 && stepper2.currentPosition() == move_to_stepper2 && stepper3.currentPosition() == move_to_stepper3 && stepper4.currentPosition() == move_to_stepper4 && stepper5.currentPosition() == move_to_stepper5 && stepper6.currentPosition() == move_to_stepper6) {
+            Serial.println(" position 1 reached ");
+            program_order = 30;
+        }
+        break;
+    case 30: // fourth position to go
+        use_movespeed = 0;
+        use_moveto_withspeed = 0;
+        move_to_stepper1 = -16188;
+        move_to_stepper2 = 10604;
+        move_to_stepper3 = -12236;
+        move_to_stepper4 = -81;
+        move_to_stepper5 = 442;
+        move_to_stepper6 = 4361;
+        Speed_max_stepper1 = speed_stepper1;
+        Speed_max_stepper2 = speed_stepper2;
+        Speed_max_stepper3 = speed_stepper3;
+        Speed_max_stepper4 = speed_stepper4;
+        Speed_max_stepper5 = speed_stepper5;
+        Speed_max_stepper6 = speed_stepper6;
+        stop_stepper1 = 0;
+        stop_stepper2 = 0;
+        stop_stepper3 = 0;
+        stop_stepper4 = 0;
+        stop_stepper5 = 0;
+        stop_stepper6 = 0;
+        move_all_to = 0; // alles teglijk aansturen 
+
+        if (stepper1.currentPosition() == move_to_stepper1 && stepper2.currentPosition() == move_to_stepper2 && stepper3.currentPosition() == move_to_stepper3 && stepper4.currentPosition() == move_to_stepper4 && stepper5.currentPosition() == move_to_stepper5 && stepper6.currentPosition() == move_to_stepper6) {
+            Serial.println(" position 1 reached ");
+            program_order = 35;
+        }
+        break;
+    case 35:
+        static unsigned long time35 = millis();
+        program_order = 36;
+        time35 = millis();
+        break;
+    case 36:
+        //servo_tool.writeMicroseconds(1500);        
+        if (millis() >= time35 + 2000) {
+            program_order = 40;
+        }
+        break;
+    case 40:
+        static unsigned long time40 = millis();
+        program_order = 41;
+        time40 = millis();
+        break;
+    case 41:
+        servo_tool.attach(tool_servo_pin);
+        servo_tool.writeMicroseconds(1500);
+        
+        if (millis() >= time40 + 2000) {
+            program_order = 600;
+            servo_tool.detach();
+        }
+        break;
+    case 600:
+        dance_order = 1;
+        program_order = 601;
+        break;
+    case 601: //dancing
+        dance();
+        if (done_dancing) {
+            program_order = 999;
+        }
+        break;
+    case 900: // run printpositions
+        program_order = 0;
+        break;
+    case 999: //ga homen en dan run program again
+        delay(1000);
+        program_order = 1000;
+
+    case 1000: // go to home position
+        use_movespeed = 0;
+        use_moveto_withspeed = 0;
+        move_to_stepper1 = -2941;
+        move_to_stepper2 = 1187;
+        move_to_stepper3 = -2500;
+        move_to_stepper4 = -431;
+        move_to_stepper5 = -1577;
+        move_to_stepper6 = -390;
+        Speed_max_stepper1 = 2000;
+        Speed_max_stepper2 = 2000;
+        Speed_max_stepper3 = 2000;
+        Speed_max_stepper4 = 2000;
+        Speed_max_stepper5 = 2000;
+        Speed_max_stepper6 = 2000;
+        stop_stepper1 = 0;
+        stop_stepper2 = 0;
+        stop_stepper3 = 0;
+        stop_stepper4 = 0;
+        stop_stepper5 = 0;
+        stop_stepper6 = 0;
+        move_all_to = 0; // alles teglijk aansturen 
+
+        if (stepper1.currentPosition() == move_to_stepper1 && stepper2.currentPosition() == move_to_stepper2 && stepper3.currentPosition() == move_to_stepper3 && stepper4.currentPosition() == move_to_stepper4 && stepper5.currentPosition() == move_to_stepper5 && stepper6.currentPosition() == move_to_stepper6) {
+            Serial.println(" position 1 reached ");
+            program_order = 1001;
+        }
+        break;
+    case 1001:
+        //softwarehomen = 1;
+        homed = 0;
+        homed_axis1 = 0;
+        homed_axis2 = 0;
+        homed_axis3 = 0;
+        homed_axis4 = 0;
+        homed_axis5 = 0;
+        homed_axis6 = 0;
+        homeorder = 1;
+        program_order = 1002;
+        break;
+    case 1002:
+        homed = home_all_axis();
+        if (homed) {
+            program_order = 1;
+        }
+        break;
+
+    }
+
+}
+
+void dance() {
+    dancing = 1;
+    switch (dance_order) {
+    case 1: // first position to go
+        done_dancing = 0;
+        use_movespeed = 0;
+        move_to_stepper1 = -2838;
+        move_to_stepper2 = 5999;
+        move_to_stepper3 = -2500;
+        move_to_stepper4 = -426;
+        move_to_stepper5 = -6376;
+        move_to_stepper6 = 4409;
+        Speed_max_stepper1 = 1000;
+        Speed_max_stepper2 = 1000;
+        Speed_max_stepper3 = 1000;
+        Speed_max_stepper4 = 1000;
+        Speed_max_stepper5 = 1000;
+        Speed_max_stepper6 = 1000;
+        stop_stepper1 = 0;
+        stop_stepper2 = 0;
+        stop_stepper3 = 0;
+        stop_stepper4 = 0;
+        stop_stepper5 = 0;
+        stop_stepper6 = 0;
+        move_all_to = 0; // alles teglijk aansturen 
+
+        servo_tool.attach(tool_servo_pin);
+        servo_tool.writeMicroseconds(1500);
+
+        if (stepper1.currentPosition() == move_to_stepper1 && stepper2.currentPosition() == move_to_stepper2 && stepper3.currentPosition() == move_to_stepper3 && stepper4.currentPosition() == move_to_stepper4 && stepper5.currentPosition() == move_to_stepper5 && stepper6.currentPosition() == move_to_stepper6) {
+            Serial.println(" position 1 reached ");
+            dance_order = 9;
+        }
+        break;
+    case 9: //second position
+        servo_tool.detach();
+        move_to_stepper1 = -23484;
+        move_to_stepper2 = 5900;
+        move_to_stepper3 = -9228;
+        move_to_stepper4 = -1562;
+        move_to_stepper5 = -10620;
+        move_to_stepper6 = 1661;
+        Speed_max_stepper1 = 1000;
+        Speed_max_stepper2 = 1000;
+        Speed_max_stepper3 = 1000;
+        Speed_max_stepper4 = 1000;
+        Speed_max_stepper5 = 1000;
+        Speed_max_stepper6 = 1000;
+        stop_stepper1 = 0;
+        stop_stepper2 = 0;
+        stop_stepper3 = 0;
+        stop_stepper4 = 0;
+        stop_stepper5 = 0;
+        stop_stepper6 = 0;
+        move_all_to = 0; // alles teglijk aansturen 
+        use_movespeed = 0;
+        if (stepper1.currentPosition() == move_to_stepper1 && stepper2.currentPosition() == move_to_stepper2 && stepper3.currentPosition() == move_to_stepper3 && stepper4.currentPosition() == move_to_stepper4 && stepper5.currentPosition() == move_to_stepper5 && stepper6.currentPosition() == move_to_stepper6) {
+            Serial.println(" position 2 reached ");
+            dance_order = 15;
+        }
+        break;
+    case 15: //third position
+        servo_tool.attach(tool_servo_pin);
+        servo_tool.writeMicroseconds(2500);
+        move_to_stepper1 = -12303;
+        move_to_stepper2 = 1186;
+        move_to_stepper3 = -16396;
+        move_to_stepper4 = 2252;
+        move_to_stepper5 = -5649;
+        move_to_stepper6 = -2256;
+        Speed_max_stepper1 = 1000;
+        Speed_max_stepper2 = 1000;
+        Speed_max_stepper3 = 1000;
+        Speed_max_stepper4 = 1000;
+        Speed_max_stepper5 = 1000;
+        Speed_max_stepper6 = 1000;
+        stop_stepper1 = 0;
+        stop_stepper2 = 0;
+        stop_stepper3 = 0;
+        stop_stepper4 = 0;
+        stop_stepper5 = 0;
+        stop_stepper6 = 0;
+        move_all_to = 0; // alles teglijk aansturen 
+        use_movespeed = 0;
+        if (stepper1.currentPosition() == move_to_stepper1 && stepper2.currentPosition() == move_to_stepper2 && stepper3.currentPosition() == move_to_stepper3 && stepper4.currentPosition() == move_to_stepper4 && stepper5.currentPosition() == move_to_stepper5 && stepper6.currentPosition() == move_to_stepper6) {
+            Serial.println(" position 3 reached ");
+            dance_order = 20;
+        }
+        break;
+    case 20: //fourth position
+        servo_tool.detach();
+        move_to_stepper1 = 17696;
+        move_to_stepper2 = 8011;
+        move_to_stepper3 = -16396;
+        move_to_stepper4 = -7784;
+        move_to_stepper5 = 2657;
+        move_to_stepper6 = 5823;
+        Speed_max_stepper1 = 1000;
+        Speed_max_stepper2 = 1000;
+        Speed_max_stepper3 = 1000;
+        Speed_max_stepper4 = 1000;
+        Speed_max_stepper5 = 1000;
+        Speed_max_stepper6 = 1000;
+        stop_stepper1 = 0;
+        stop_stepper2 = 0;
+        stop_stepper3 = 0;
+        stop_stepper4 = 0;
+        stop_stepper5 = 0;
+        stop_stepper6 = 0;
+        move_all_to = 0; // alles teglijk aansturen 
+        use_movespeed = 0;
+        if (stepper1.currentPosition() == move_to_stepper1 && stepper2.currentPosition() == move_to_stepper2 && stepper3.currentPosition() == move_to_stepper3 && stepper4.currentPosition() == move_to_stepper4 && stepper5.currentPosition() == move_to_stepper5 && stepper6.currentPosition() == move_to_stepper6) {
+            Serial.println(" position 4 reached ");
+            dance_order = 30;
+        }
+        break;
+    case 25: //5  position
+        servo_tool.attach(tool_servo_pin);
+        servo_tool.writeMicroseconds(500);
+        move_to_stepper1 = -5544;
+        move_to_stepper2 = 1845;
+        move_to_stepper3 = -8887;
+        move_to_stepper4 = -58;
+        move_to_stepper5 = 755;
+        move_to_stepper6 = -6363;
+        Speed_max_stepper1 = 1000;
+        Speed_max_stepper2 = 1000;
+        Speed_max_stepper3 = 1000;
+        Speed_max_stepper4 = 1000;
+        Speed_max_stepper5 = 1000;
+        Speed_max_stepper6 = 1000;
+        stop_stepper1 = 0;
+        stop_stepper2 = 0;
+        stop_stepper3 = 0;
+        stop_stepper4 = 0;
+        stop_stepper5 = 0;
+        stop_stepper6 = 0;
+        move_all_to = 0; // alles teglijk aansturen 
+        use_movespeed = 0;
+        if (stepper1.currentPosition() == move_to_stepper1 && stepper2.currentPosition() == move_to_stepper2 && stepper3.currentPosition() == move_to_stepper3 && stepper4.currentPosition() == move_to_stepper4 && stepper5.currentPosition() == move_to_stepper5 && stepper6.currentPosition() == move_to_stepper6) {
+            Serial.println(" position 5 reached ");
+            dance_order = 30;
+        }
+        break;
+    case 30:
+        servo_tool.detach();
+        done_dancing = 1;
+        break;
+    }
 }
 
 void loop() {
@@ -1101,18 +1805,20 @@ void loop() {
         read_inputs();
         print();
         control_stepper();
-        
-       // Serial.print(" status switch = ");
+
+        // Serial.print(" status switch = ");
 
         if (!status_knop_noodstop_kast) {
             if (status_knop_reset) {
                 digitalWrite(enable_all_steppers, LOW); // set all motors on
                 digitalWrite(power_steppers_off, LOW); //schakel relais weer in
                 stop_moving = 0;
+                ready_for_functions_call = 1;
             }
             if (!status_knop_enable_all_steppers) {
                 digitalWrite(enable_all_steppers, HIGH); // set all motors of
                 homed = 0;
+                homing = 0;
                 homed_axis1 = 0;
                 homed_axis2 = 0;
                 homed_axis3 = 0;
@@ -1121,38 +1827,39 @@ void loop() {
                 homed_axis6 = 0;
                 homeorder = 1;
                 softwarehomen = 1;
-
+                printing_positions = 0;
             }
             if (status_knop_stop_controller || stop_moving) {
                 stop_moving = 1;
             }
 
-            if ((softwarejoggen == 1) && (stop_moving == 0) && (ready_for_functions_call == 1 || joging == 1) ) {
-              //  Serial.println(" jog function called ");
-                //joggen();
+            if ((softwarejoggen == 1) && (stop_moving == 0) && (ready_for_functions_call == 1 || joging == 1)) {
+                joggen();
             }
             else {
                 joging = 0;
             }
-            if ((softwarehomen == 1 && (stop_moving == 0) && (ready_for_functions_call == 1 || homing == 1 ))) {
+            if ((softwarejoggen == 0 && softwarehomen == 1 && (stop_moving == 0) && (ready_for_functions_call == 1 || homing == 1))) {
                 homed = home_all_axis();
                 if (homed == 1) {
-                        softwarehomen = 0;
-                        homing = 0;
+                    first_time_home = 1;
+                    softwarehomen = 0;
+                    homing = 0;
+                    program_order = 1;
                 }
             }
 
-            if (homed || printing_positions) {
-                //softwarejoggen = 1;
-                printPosition();
+            if (first_time_home == 1 ) {
                 printing_positions = 1;
-                //run program
+                printPosition();
+                run_program();
             }
         }
         else {
             digitalWrite(enable_all_steppers, HIGH); // set all motors off
             digitalWrite(power_steppers_off, HIGH); //schakel relais
             homed = 0;
+            homing = 0;
             homed_axis1 = 0;
             homed_axis2 = 0;
             homed_axis3 = 0;
@@ -1161,6 +1868,7 @@ void loop() {
             homed_axis6 = 0;
             homeorder = 1;
             softwarehomen = 1;
+            printing_positions = 0;
         }
     }
 }
